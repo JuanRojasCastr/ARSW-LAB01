@@ -29,25 +29,28 @@ public class HostBlackListsValidator {
      * @param ipaddress suspicious host's IP address.
      * @return  Blacklists numbers where the given host's IP address was found.
      */
-    public List<Integer> checkHost(String ipaddress){
+    public List<Integer> checkHost(String ipaddress, int N){
         
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
         
         int ocurrencesCount=0;
         
-        HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
-        
-        int checkedListsCount=0;
-        
-        for (int i=0;i<skds.getRegisteredServersCount() && ocurrencesCount<BLACK_LIST_ALARM_COUNT;i++){
-            checkedListsCount++;
-            
-            if (skds.isInBlackListServer(i, ipaddress)){
-                
-                blackListOcurrences.add(i);
-                
-                ocurrencesCount++;
-            }
+        HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
+
+        int parts = skds.getRegisteredServersCount()/N;
+
+        int checkedInitial = 0;
+        int checkedListsCount = parts;
+
+        for (int i=0;i<N;i++) {
+            System.out.println(checkedInitial);
+            System.out.println(checkedListsCount);
+
+            SearchThread thread = new SearchThread(ipaddress, checkedInitial, checkedListsCount);
+            thread.run();
+            ocurrencesCount += thread.getOcurrencesCount();
+            checkedInitial = checkedListsCount;
+            checkedListsCount += parts;
         }
         
         if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
