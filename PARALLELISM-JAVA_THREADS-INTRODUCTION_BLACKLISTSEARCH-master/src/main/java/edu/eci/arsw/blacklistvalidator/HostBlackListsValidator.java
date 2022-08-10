@@ -37,7 +37,11 @@ public class HostBlackListsValidator {
         
         HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
 
+        System.out.println("AAAAA " + skds.getRegisteredServersCount() % N);
+
         int parts = skds.getRegisteredServersCount()/N;
+
+
 
         int checkedInitial = 0;
         int checkedListsCount = parts;
@@ -47,10 +51,11 @@ public class HostBlackListsValidator {
             System.out.println(checkedListsCount);
 
             SearchThread thread = new SearchThread(ipaddress, checkedInitial, checkedListsCount);
-            thread.run();
+//            thread.run();
             ocurrencesCount += thread.getOcurrencesCount();
             checkedInitial = checkedListsCount;
-            checkedListsCount += parts;
+            checkedListsCount = (i == N - 2) ?  (checkedListsCount + parts) + skds.getRegisteredServersCount() % N :  checkedListsCount + parts;
+
         }
         
         if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
