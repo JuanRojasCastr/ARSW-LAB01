@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="PARALLELISM-JAVA_THREADS-INTRODUCTION_BLACKLISTSEARCH-master" />
         <module name="PiDigits" />
+        <module name="ARSW-LAB01" />
       </profile>
     </annotationProcessing>
   </component>
