@@ -32,12 +32,14 @@ public class HostBlackListsValidator {
     public List<Integer> checkHost(String ipaddress, int N){
         
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
-        
+
+        LinkedList<Thread> Thread = new LinkedList<>();
+
         int ocurrencesCount=0;
         
         HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
 
-        System.out.println("AAAAA " + skds.getRegisteredServersCount() % N);
+        //System.out.println("AAAAA " + skds.getRegisteredServersCount() % N);
 
         int parts = skds.getRegisteredServersCount()/N;
 
@@ -47,23 +49,31 @@ public class HostBlackListsValidator {
         int checkedListsCount = parts;
 
         for (int i=0;i<N;i++) {
-            System.out.println(checkedInitial);
-            System.out.println(checkedListsCount);
-
+            //System.out.println(checkedInitial);
+            //System.out.println(checkedListsCount);
             SearchThread thread = new SearchThread(ipaddress, checkedInitial, checkedListsCount);
-//            thread.run();
+            thread.start();
+            if (i>0){
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             ocurrencesCount += thread.getOcurrencesCount();
+            blackListOcurrences.add(ocurrencesCount);
             checkedInitial = checkedListsCount;
             checkedListsCount = (i == N - 2) ?  (checkedListsCount + parts) + skds.getRegisteredServersCount() % N :  checkedListsCount + parts;
 
         }
-        
+
+
         if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
             skds.reportAsNotTrustworthy(ipaddress);
         }
         else{
             skds.reportAsTrustworthy(ipaddress);
-        }                
+        }
         
         LOG.log(Level.INFO, "Checked Black Lists:{0} of {1}", new Object[]{checkedListsCount, skds.getRegisteredServersCount()});
         
