@@ -33,7 +33,7 @@ public class HostBlackListsValidator {
         
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
 
-        LinkedList<Thread> Thread = new LinkedList<>();
+        LinkedList<SearchThread> listThread = new LinkedList<>();
 
         int ocurrencesCount=0;
         
@@ -52,6 +52,7 @@ public class HostBlackListsValidator {
             //System.out.println(checkedInitial);
             //System.out.println(checkedListsCount);
             SearchThread thread = new SearchThread(ipaddress, checkedInitial, checkedListsCount);
+            listThread.add(thread);
             thread.start();
             if (i>0){
                 try {
@@ -67,7 +68,10 @@ public class HostBlackListsValidator {
 
         }
 
-
+        for (SearchThread thread:listThread) {
+            ocurrencesCount += thread.getOcurrencesCount();
+        }
+        System.out.println(ocurrencesCount);
         if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
             skds.reportAsNotTrustworthy(ipaddress);
         }
